@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    "target": "ES2022",
+
+    "strict": true,
+    "esModuleInterop": true,
+    "types": ["node", "express", "multer"],
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"]
+}
