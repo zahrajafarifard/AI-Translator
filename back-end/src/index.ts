@@ -1,15 +1,15 @@
-// src/app.ts
-
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 
 import "./models/document.model.js";
+
+import "./models/associations.js";
 import { sequelize } from "./config/database.js";
 
 import documentRoutes from "./api/routes/document.routes.js";
-// import authRoutes from "./api/routes/auth.routes.js";
+import authRoutes from "./api/routes/auth.routes.js";
 
 const app = express();
 
@@ -38,7 +38,7 @@ app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/documents", documentRoutes);
-// app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Health check
 app.get("/health", (_req, res) => {
@@ -51,20 +51,16 @@ app.get("/health", (_req, res) => {
 // Error handler (should be last)
 app.use(
   (
-    err: Error,
+    err: Error & { statusCode?: number; statusMessage?: string },
     _req: express.Request,
     res: express.Response,
     _next: express.NextFunction,
   ) => {
-    console.error(err);
-
-    res.status(500).json({
-      message: "Internal server error",
+    res.status(err?.statusCode ?? 500).json({
+      message: err?.statusMessage ?? "Internal server error",
     });
   },
 );
-
-// export default app;
 
 sequelize
   .sync()
@@ -73,11 +69,7 @@ sequelize
     const server = app.listen(4000, () => {
       console.log("Server is up on port 4000");
     });
-    // const io = require("./socket.js").init(server);
-    // io.on("connection", (socket) => {
-    //   console.log("socket connected ...");
-    // });
   })
   .catch((err) => {
-    // console.log(err);
+    console.log("sequelize err:", err);
   });

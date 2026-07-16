@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 export default function FileUploader() {
   const [file, setFile] = useState<File | null>(null);
+
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <p>Loading...</p>;
+  }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0];
@@ -18,23 +25,30 @@ export default function FileUploader() {
 
     const formData = new FormData();
     formData.append("document", file);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/documents/translate`,
+        {
+          method: "POST",
+          body: formData,
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/documents/translate`,
-      {
-        method: "POST",
-        body: formData,
-      },
-    );
+          headers: {
+            Authorization: `Bearer ${session?.backendToken}`,
+          },
+        },
+      );
 
-    if (!response.ok) {
-      const error = await response.json();
+      if (!response.ok) {
+        const error = await response.json();
 
-      throw new Error(error?.message || "File upload failed");
+        throw new Error(error?.message || "File upload failed");
+      }
+
+      const data = await response.json();
+      console.log("data:", data);
+    } catch (error) {
+      console.log("err", error);
     }
-
-    const data = await response.json();
-    console.log("Data::", data);
   }
 
   return (

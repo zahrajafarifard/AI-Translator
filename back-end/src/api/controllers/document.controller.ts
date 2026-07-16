@@ -14,7 +14,6 @@ export async function translateDocument(
     }
 
     const result = await translationService.translate(req.file);
-    
 
     res.status(200).json(result);
   } catch (error: unknown) {

@@ -4,14 +4,18 @@ import { TranslationJobService } from "../api/services/translation-job.service.j
 
 const service = new TranslationJobService();
 
-new Worker(
+const worker = new Worker(
   "translation",
   async (job) => {
     console.log("Path:", job.data.filePath);
 
-    await service.process(job.data.filePath);
+    await service.translateDocument(job.data.filePath);
   },
   {
     connection: redisConnection,
   },
 );
+
+worker.on("completed", (job) => {
+  console.log("The translation has been completed.", job.data.filePath);
+});

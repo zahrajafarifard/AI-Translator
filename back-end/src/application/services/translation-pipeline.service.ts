@@ -27,7 +27,7 @@ export class TranslationPipelineService {
           original: paragraph,
           translated,
         };
-      })
+      }),
     );
 
     return Promise.all(tasks);

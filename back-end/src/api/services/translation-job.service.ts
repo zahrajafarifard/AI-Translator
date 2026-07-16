@@ -56,20 +56,15 @@ function createWriter(extension: string): Writer {
   }
 }
 export class TranslationJobService {
-  async process(filePath: string) {
+  async translateDocument(filePath: string) {
     const inputPath = path.resolve(filePath);
-    console.log("inputPath", inputPath);
+    console.log("inputPath:", inputPath);
 
     if (!existsSync(inputPath)) {
       throw new Error(`File not found: ${inputPath}`);
     }
 
-    const outputPath = path.resolve(
-      "src",
-      "uploads",
-      "translated",
-      `translated.docx`,
-    );
+    const outputPath = path.resolve("uploads", "translated", `translated.docx`);
 
     console.log("outputPath", outputPath);
 
