@@ -4,8 +4,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 import "./models/document.model.js";
-
 import "./models/associations.js";
+
 import { sequelize } from "./config/database.js";
 
 import documentRoutes from "./api/routes/document.routes.js";

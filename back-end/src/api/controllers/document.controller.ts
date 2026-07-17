@@ -13,7 +13,7 @@ export async function translateDocument(
       return;
     }
 
-    const result = await translationService.translate(req.file);
+    const result = await translationService.translate(req.file,  req.user.userId);
 
     res.status(200).json(result);
   } catch (error: unknown) {

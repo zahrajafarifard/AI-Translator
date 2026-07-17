@@ -117,8 +117,8 @@ export class DocxLayoutTranslator {
     paragraphXml: string,
     translatedText: string,
   ): string {
-    const textRuns = [...paragraphXml.matchAll(TEXT_RUN_PATTERN)].map(
-      (match) => this.decodeXml(match[2] ?? ""),
+    const textRuns = [...paragraphXml.matchAll(TEXT_RUN_PATTERN)].map((match) =>
+      this.decodeXml(match[2] ?? ""),
     );
     const translatedParts = this.splitTextAcrossRuns(translatedText, textRuns);
     let textRunIndex = 0;
@@ -234,12 +234,21 @@ export class DocxLayoutTranslator {
   }
 
   private hasDrawingWithoutText(paragraphXml: string): boolean {
-    return /<w:drawing\b/.test(paragraphXml) && !this.getParagraphText(paragraphXml).trim();
+    return (
+      /<w:drawing\b/.test(paragraphXml) &&
+      !this.getParagraphText(paragraphXml).trim()
+    );
   }
 
-  private ensureParagraphAlignment(paragraphXml: string, alignment: string): string {
+  private ensureParagraphAlignment(
+    paragraphXml: string,
+    alignment: string,
+  ): string {
     if (/<w:jc\b/.test(paragraphXml)) {
-      return paragraphXml.replace(/<w:jc\b[^/]*\/>/, `<w:jc w:val="${alignment}"/>`);
+      return paragraphXml.replace(
+        /<w:jc\b[^/]*\/>/,
+        `<w:jc w:val="${alignment}"/>`,
+      );
     }
 
     if (/<w:pPr\b/.test(paragraphXml)) {
@@ -257,7 +266,10 @@ export class DocxLayoutTranslator {
 
   private ensureRtlRuns(paragraphXml: string): string {
     return paragraphXml.replace(/<w:r\b[^>]*>[\s\S]*?<\/w:r>/g, (runXml) => {
-      if (!/<w:t\b/.test(runXml) || /<w:rPr\b[\s\S]*?<w:rtl\b[\s\S]*?<\/w:rPr>/.test(runXml)) {
+      if (
+        !/<w:t\b/.test(runXml) ||
+        /<w:rPr\b[\s\S]*?<w:rtl\b[\s\S]*?<\/w:rPr>/.test(runXml)
+      ) {
         return runXml;
       }
 

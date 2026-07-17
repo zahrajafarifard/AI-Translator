@@ -56,7 +56,7 @@ function createWriter(extension: string): Writer {
   }
 }
 export class TranslationJobService {
-  async translateDocument(filePath: string) {
+  async translateDocument(filePath: string, documentId: number) {
     const inputPath = path.resolve(filePath);
     console.log("inputPath:", inputPath);
 
@@ -64,7 +64,10 @@ export class TranslationJobService {
       throw new Error(`File not found: ${inputPath}`);
     }
 
-    const outputPath = path.resolve("uploads", "translated", `translated.docx`);
+    const outputPath = path.resolve(
+      "translated",
+      `${documentId}-translated.docx`,
+    );
 
     console.log("outputPath", outputPath);
 
@@ -82,12 +85,14 @@ export class TranslationJobService {
 
       const translated = await translateParagraphs(paragraphs, pipeline);
 
-      await translator.writeTranslatedCopy(inputPath, outputPath, translated);
-
-      return {
-        status: "completed",
+      await translator.writeTranslatedCopy(
+        inputPath,
         outputPath,
-      };
+        translated,
+        documentId,
+      );
+
+      return;
     }
 
     // Generic pipeline
@@ -101,10 +106,5 @@ export class TranslationJobService {
     const translated = await translateParagraphs(paragraphs, pipeline);
 
     await writer.write(outputPath, translated);
-
-    return {
-      status: "completed",
-      outputPath,
-    };
   }
 }

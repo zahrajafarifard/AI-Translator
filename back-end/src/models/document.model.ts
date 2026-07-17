@@ -1,21 +1,24 @@
 import { DataTypes, Model } from "sequelize";
+import type {
+  CreationOptional,
+  InferAttributes,
+  InferCreationAttributes,
+} from "sequelize";
 import { sequelize } from "../config/database.js";
 
-class Document extends Model {
-  declare id: number;
+class Document extends Model<
+  InferAttributes<Document, { omit: "createdAt" | "updatedAt" }>,
+  InferCreationAttributes<Document, { omit: "createdAt" | "updatedAt" }>
+> {
+  declare id: CreationOptional<number>;
   declare user_id: number;
   declare original_name: string;
   declare original_path: string;
   declare translated_path: string | null;
-  declare status:
-    | "UPLOADED"
-    | "QUEUED"
-    | "PROCESSING"
-    | "COMPLETED"
-    | "FAILED";
+  declare status: "QUEUED" | "PROCESSING" | "COMPLETED" | "FAILED";
   declare source_language: string;
   declare target_language: string;
-  declare pages: number;
+  declare error_message: string | null;
 
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -50,15 +53,9 @@ Document.init(
     },
 
     status: {
-      type: DataTypes.ENUM(
-        "UPLOADED",
-        "QUEUED",
-        "PROCESSING",
-        "COMPLETED",
-        "FAILED"
-      ),
+      type: DataTypes.ENUM("QUEUED", "PROCESSING", "COMPLETED", "FAILED"),
       allowNull: false,
-      defaultValue: "UPLOADED",
+      defaultValue: "QUEUED",
     },
 
     source_language: {
@@ -70,11 +67,9 @@ Document.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-
-    pages: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0,
+    error_message: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
@@ -82,7 +77,7 @@ Document.init(
     modelName: "Document",
     tableName: "documents",
     timestamps: true,
-  }
+  },
 );
 
 export default Document;

@@ -5,10 +5,6 @@ interface JwtPayload {
   userId: number;
 }
 
-// export interface AuthRequest extends Request {
-//   user?: JwtPayload;
-// }
-
 export function authMiddleware(
   req: Request,
   res: Response,
@@ -28,8 +24,6 @@ export function authMiddleware(
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
 
     req.user = decoded;
-
-   
 
     next();
   } catch (error) {
