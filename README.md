@@ -14,6 +14,7 @@ The application uses a modular architecture with:
 - Background workers for asynchronous processing
 - Local AI model integration through Ollama
 - Frontend interface for user interaction
+- Email notifications that send a download link to the user after translation completion
 
 ---
 
@@ -28,6 +29,7 @@ The application uses a modular architecture with:
 - JWT Authentication
 - PDF, DOCX, and TXT processing libraries
 - Ollama for local AI translation
+- Nodemailer for sending translation-ready email notifications with download links
 
 ### Frontend
 
@@ -110,3 +112,5 @@ cd AI-Document-Translator
 ## Notes
 
 The translation system runs completely with a local AI model through Ollama. Redis is used for background job processing and runs as a Docker container.
+
+When a translation job is completed, the backend updates the document status, generates a secure download link, and sends it to the user via email using Nodemailer.
