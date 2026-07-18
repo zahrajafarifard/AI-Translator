@@ -58,24 +58,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.googleId = token.googleId as string;
       return session;
     },
-
-    // async signIn({ user, account }) {
-    //   if (account?.provider === "google") {
-    //     await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
-    //       method: "POST",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({
-    //         google_id: account.providerAccountId,
-    //         name: user.name,
-    //         email: user.email,
-    //         avatar: user.image,
-    //       }),
-    //     });
-    //   }
-
-    //   return true;
-    // },
   },
 });
