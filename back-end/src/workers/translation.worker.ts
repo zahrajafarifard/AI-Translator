@@ -1,7 +1,9 @@
+import crypto from "crypto";
 import { Worker } from "bullmq";
-import { redisConnection } from "../config/redis.js";
-import { TranslationJobService } from "../api/services/translation-job.service.js";
 import Document from "../models/document.model.js";
+import { redisConnection } from "../config/redis.js";
+import { EmailService } from "../infrastructure/email/email.service.js";
+import { TranslationJobService } from "../api/services/translation-job.service.js";
 
 const service = new TranslationJobService();
 
@@ -32,6 +34,8 @@ const worker = new Worker(
   {
     connection: redisConnection,
     maxStalledCount: 1,
+    concurrency: 1,
+    lockDuration: 3 * 60 * 60 * 1000,
   },
 );
 worker.on("active", (job) => {
@@ -40,17 +44,27 @@ worker.on("active", (job) => {
 
 worker.on("completed", async (job) => {
   console.log("The translation has been completed.", job.data?.documentId);
+  const token = crypto.randomBytes(32).toString("hex");
 
   await Document.update(
     {
       status: "COMPLETED",
       translated_path: `translated\\${job.data?.documentId}-translated.docx`,
+      downloadToken: token,
+      tokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     },
     {
       where: {
         id: job.data?.documentId,
       },
     },
+  );
+
+  const emailService = new EmailService();
+
+  await emailService.sendTranslationReadyEmail(
+    "jafarifardz@gmail.com",
+    `${process.env.APP_URL}/api/download/${token}`,
   );
 });
 

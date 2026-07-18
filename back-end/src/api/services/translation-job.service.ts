@@ -89,7 +89,6 @@ export class TranslationJobService {
         inputPath,
         outputPath,
         translated,
-        documentId,
       );
 
       return;

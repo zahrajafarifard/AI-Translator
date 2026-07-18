@@ -19,6 +19,8 @@ class Document extends Model<
   declare source_language: string;
   declare target_language: string;
   declare error_message: string | null;
+  declare downloadToken: string | null;
+  declare tokenExpiry: Date | null;
 
   declare readonly createdAt: Date;
   declare readonly updatedAt: Date;
@@ -69,6 +71,14 @@ Document.init(
     },
     error_message: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    downloadToken: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    tokenExpiry: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
   },

@@ -1,127 +1,121 @@
 # Backend Service
 
-This folder contains the backend API for the document translation application.
-
-The backend is responsible for handling file uploads, managing document metadata, authenticating users, creating and processing translation jobs, and executing the document translation pipeline using local AI models.
+This backend powers the document translation workflow for the application. It handles Google-based authentication, document upload, translation job creation, background processing, email notifications, and secure download links for translated files.
 
 ---
 
-## Responsibilities
+## What the backend does
 
-The backend provides APIs for:
+The service currently provides:
 
-- User authentication and authorization
-- Document upload and metadata management
-- Translation job creation and tracking
-- Document processing workflows
-- Health checks and service monitoring
-
-It also runs a background worker that processes translation jobs asynchronously, keeping long-running translation tasks separate from the main API request lifecycle.
-
----
-
-## Main Technologies
-
-### Runtime and Framework
-
-- **Node.js**
-- **TypeScript**
-- **Express.js**
-
-### Database and ORM
-
-- **MySQL** — persistent data storage
-- **Sequelize** — database ORM and model management
-
-### Background Processing
-
-- **BullMQ** — distributed job queue management
-- **Redis** — queue storage and job coordination
-
-### Document Processing
-
-The backend supports reading, translating, and generating multiple document formats.
-
-Libraries used:
-
-- **pdfjs-dist** — PDF text extraction
-- **pdfkit** — PDF generation
-- **mammoth** — DOCX content extraction
-- **docx** — DOCX document generation
-- **jszip** — DOCX package manipulation
-
-### Authentication and Security
-
-Security and API protection are implemented using:
-
-- **JWT** — user authentication and authorization
-- **Helmet** — HTTP security headers
-- **CORS** — cross-origin request management
-- **Morgan** — HTTP request logging
-
-### AI Translation Engine
-
-The translation pipeline integrates with **Ollama**, allowing the application to run local large language models (LLMs) for document translation without relying on external AI APIs.
+- User authentication via Google login
+- File upload for PDF, DOCX, and TXT documents
+- Translation job submission to a Redis-backed queue
+- Asynchronous document processing through a BullMQ worker
+- Email notifications when a translation is ready
+- Download access through a temporary token-based endpoint
+- Health check support for monitoring
 
 ---
 
-## Project Structure
+## Main technologies
 
-```
+### Runtime and framework
+
+- Node.js
+- TypeScript
+- Express.js
+
+### Data and persistence
+
+- MySQL
+- Sequelize
+
+### Background jobs and caching
+
+- Redis
+- BullMQ
+- ioredis
+
+### Document processing and AI
+
+- pdfjs-dist for PDF text extraction
+- pdfkit for PDF generation
+- mammoth for DOCX reading
+- docx for DOCX generation
+- Ollama for local LLM-based translation
+
+### Security and utilities
+
+- JWT for authentication
+- Helmet for security headers
+- CORS for frontend access
+- Multer for file uploads
+- Nodemailer for email delivery
+
+---
+
+## API overview
+
+### Authentication
+
+- POST /api/auth/google
+  - Authenticates a user using Google identity data and returns a JWT
+
+### Documents
+
+- POST /api/documents/translate
+  - Authenticates the user, accepts a document upload, and queues it for translation
+
+### Downloads
+
+- GET /api/download/:token
+  - Returns the translated document when the token is valid
+
+### Health check
+
+- GET /health
+  - Verifies that the API service is running
+
+---
+
+## Project structure
+
+```text
 src/
-├── index.ts                 # Application entry point
-│
-├── api/                     # API layer
-│   ├── controllers/         # Request handlers
-│   ├── routes/              # API route definitions
-│   └── services/            # Business logic for API operations
-│
-├── application/             # Application-level services
-│   └── translation pipeline and business workflows
-│
-├── config/                  # Environment and infrastructure configuration
-│
-├── infrastructure/          # External integrations
-│   ├── document readers
-│   ├── document writers
-│   └── Ollama LLM services
-│
-├── models/                  # Sequelize database models and relationships
-│
-└── workers/                 # Background workers for queued jobs
+├── index.ts                   # Express app entry point
+├── api/
+│   ├── controllers/           # Request handlers
+│   ├── routes/                # API routes
+│   └── services/              # API-level services
+├── application/
+│   └── services/              # Translation workflow orchestration
+├── config/                    # Database, Redis, multer, and Ollama config
+├── infrastructure/
+│   ├── docx/                  # DOCX layout translation logic
+│   ├── email/                 # Email notifications
+│   ├── llm/                   # Ollama translation integration
+│   ├── readers/               # PDF/DOCX/TXT readers
+│   └── writers/               # PDF/DOCX writers
+├── middleware/                # Auth middleware
+├── models/                    # Sequelize models and relationships
+├── workers/                   # Background translation worker
+└── utils/                     # Helper utilities
 ```
 
-## Development
+---
 
-Install dependencies:
+## Development setup
+
+### 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-Run the API server:
+### 2. Configure environment variables
 
-```bash
-npm run dev
-```
-
-Run the background worker:
-
-```bash
-npm run worker
-```
-
-Build for production:
-
-```bash
-npm run build
-```
-
----
-
-## Environment Variables
-
-Create an environment configuration file and provide the required values:
+Create a .env file in the backend folder with the following variables:
 
 ```env
 DB_NAME=
@@ -132,21 +126,40 @@ DB_PORT=
 
 JWT_SECRET=
 
+REDIS_HOST=
+REDIS_PORT=
+
 OLLAMA_ENDPOINT=
 OLLAMA_MODEL=
 
 FRONTEND_URL=
+APP_URL=
+
+EMAIL=
+EMAIL_PASSWORD=
 ```
 
----
+### 3. Run the API server
 
-## Architecture Overview
+```bash
+npm run dev
+```
 
-The backend follows a layered architecture:
+### 4. Run the worker for background translation jobs
 
-- **API Layer** handles HTTP requests and responses.
-- **Application Layer** contains business workflows and use cases.
-- **Infrastructure Layer** manages external dependencies such as databases, document processing, and AI services.
-- **Worker Layer** handles asynchronous background processing.
+```bash
+npm run worker
+```
 
-This separation keeps the system modular, testable, and easier to extend with additional document formats or translation models.
+### 5. Build for production
+
+```bash
+npm run build
+```
+
+## Notes
+
+- Supported upload types are PDF, DOCX, and TXT.
+- Maximum upload size is 40 MB.
+- The current setup is designed to work with a local Ollama instance and a local Redis instance.
+- The worker process should be running whenever translation jobs need to be processed.

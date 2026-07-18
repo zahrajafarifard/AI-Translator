@@ -9,6 +9,7 @@ import "./models/associations.js";
 import { sequelize } from "./config/database.js";
 
 import documentRoutes from "./api/routes/document.routes.js";
+import downloadRoutes from "./api/routes/download.routes.js";
 import authRoutes from "./api/routes/auth.routes.js";
 
 const app = express();
@@ -38,6 +39,7 @@ app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/documents", documentRoutes);
+app.use("/api/download", downloadRoutes);
 app.use("/api/auth", authRoutes);
 
 // Health check
